@@ -51,7 +51,7 @@ const COLUMN = Object.freeze({
 });
 
 function doGet(e) {
-  const template = HtmlService.createTemplateFromFile('Index');
+  const template = HtmlService.createTemplateFromFile('index');
   const requestedView = e && e.parameter ? String(e.parameter.view || '') : '';
   template.initialView = requestedView.toLowerCase() === 'office' ? 'office' : 'customer';
 
