@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <style>
+      :root {
+        --navy: #17324d;
+        --navy-2: #234b70;
+        --yellow: #fff200;
+        --page: #f3f6f9;
+        --card: #ffffff;
+        --line: #d6dee7;
+        --muted: #607183;
+        --success: #137333;
+        --danger: #b3261e;
+        --shadow: 0 14px 38px rgba(23, 50, 77, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--navy);
+        background: var(--page);
+        font: 16px/1.45 Arial, Helvetica, sans-serif;
+      }
+      button, input, select, textarea { font: inherit; }
+      button { cursor: pointer; }
+      .topbar {
+        background: var(--navy);
+        color: #fff;
+        padding: 18px 24px;
+      }
+      .topbar-inner, .page { max-width: 1180px; margin: 0 auto; }
+      .brand { font-size: 1.22rem; font-weight: 800; letter-spacing: 0.01em; }
+      .subtitle { margin-top: 3px; color: #d6e3ef; font-size: 0.9rem; }
+      .page { padding: 28px 20px 52px; }
+      .view-switch {
+        display: flex;
+        gap: 8px;
+        width: fit-content;
+        margin: 0 0 20px;
+        padding: 5px;
+        background: #e4eaf0;
+        border-radius: 12px;
+      }
+      .tab {
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 16px;
+        color: var(--navy);
+        background: transparent;
+        font-weight: 700;
+      }
+      .tab.active { background: #fff; box-shadow: 0 2px 8px rgba(23, 50, 77, 0.13); }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .section-heading {
+        margin: 0;
+        padding: 13px 18px;
+        color: #111;
+        background: var(--yellow);
+        font-size: 1.08rem;
+        font-weight: 800;
+      }
+      .card-body { padding: 22px; }
+      .intro { margin: 0 0 18px; color: var(--muted); }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field.full { grid-column: 1 / -1; }
+      label { font-size: 0.9rem; font-weight: 700; }
+      .required::after { content: ' *'; color: var(--danger); }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid #b8c5d1;
+        border-radius: 9px;
+        padding: 10px 11px;
+        color: #15283a;
+        background: #fff;
+        outline: none;
+      }
+      textarea { min-height: 82px; resize: vertical; }
+      input:focus, select:focus, textarea:focus {
+        border-color: var(--navy-2);
+        box-shadow: 0 0 0 3px rgba(35, 75, 112, 0.13);
+      }
+      input[readonly], textarea[readonly] { background: #f2f5f7; color: #425466; }
+      .subhead {
+        grid-column: 1 / -1;
+        margin: 6px 0 -3px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 800;
+      }
+      .actions { display: flex; gap: 10px; align-items: center; margin-top: 22px; }
+      .primary, .secondary {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 18px;
+        font-weight: 800;
+      }
+      .primary { background: var(--navy); color: #fff; }
+      .primary:hover { background: var(--navy-2); }
+      .secondary { color: var(--navy); background: #e8eef4; }
+      button:disabled { cursor: wait; opacity: 0.65; }
+      .message { display: none; margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; }
+      .message.show { display: block; }
+      .message.success { color: var(--success); background: #e8f5eb; border: 1px solid #a8d5b3; }
+      .message.error { color: var(--danger); background: #fceceb; border: 1px solid #efb3af; }
+      .success-panel { display: none; text-align: center; padding: 36px 24px; }
+      .success-panel.show { display: block; }
+      .success-icon {
+        display: grid;
+        place-items: center;
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        color: #fff;
+        background: var(--success);
+        font-size: 1.7rem;
+      }
+      .reference {
+        display: inline-block;
+        margin: 8px 0 18px;
+        padding: 8px 13px;
+        border-radius: 8px;
+        background: #edf2f6;
+        font: 700 1rem Consolas, monospace;
+      }
+      .office-login { max-width: 520px; }
+      body.office-mode { background: #2168d2; }
+      body.modal-open { overflow: hidden; }
+      body.office-mode .topbar { background: #f7a000; }
+      body.office-mode .subtitle { color: #fff7df; }
+      body.office-mode .page { max-width: 1640px; }
+      body.office-mode .view-switch { background: rgba(8, 42, 101, 0.32); }
+      body.office-mode .tab { color: #fff; }
+      body.office-mode .tab.active { color: var(--navy); }
+      .dashboard-bar { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 16px; color: #fff; }
+      .dashboard-bar h1 { margin: 0; font-size: 1.7rem; }
+      .dashboard-bar p { margin: 3px 0 0; color: #cfe1ff; }
+      .dashboard-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+      .dashboard-actions button { border: 0; border-radius: 9px; padding: 10px 14px; color: #fff; background: #102b4b; font-weight: 800; }
+      .dashboard-actions .logout-button { background: #b42318; }
+      .dashboard-actions .logout-button:hover { background: #8f1d14; }
+      .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; margin-bottom: 14px; }
+      .summary-card { min-height: 84px; padding: 14px; border-radius: 12px; color: #fff; background: #154bb9; box-shadow: 0 8px 22px rgba(8, 42, 101, 0.18); }
+      .summary-label { font-size: 0.9rem; color: #d4e3ff; }
+      .summary-value { margin-top: 3px; font-size: 1.55rem; font-weight: 800; }
+      .dashboard-role { margin-bottom: 14px; padding: 15px 18px; border-radius: 12px; background: #fff; color: var(--navy); }
+      .dashboard-role strong { display: block; margin-bottom: 2px; }
+      .dashboard-role span { color: var(--muted); font-size: 0.9rem; }
+      .filter-card { margin-bottom: 14px; padding: 14px; border: 1px solid #073481; border-radius: 12px; color: #fff; background: #124bb7; }
+      .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+      .filter-card label { color: #d9e7ff; }
+      .filter-card input, .filter-card select { border-color: #081b33; color: #fff; background: #091b33; }
+      .filter-actions { display: flex; gap: 8px; align-items: end; }
+      .filter-actions button { min-height: 43px; border: 0; border-radius: 9px; padding: 9px 14px; color: #fff; background: #102b4b; font-weight: 800; }
+      .table-heading { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin: 0 0 8px; color: #fff; }
+      .table-heading h2 { margin: 0; font-size: 1.15rem; }
+      .table-heading span { color: #bdd5ff; font-size: 0.88rem; }
+      .table-card { overflow: hidden; border: 1px solid #073481; border-radius: 12px; box-shadow: var(--shadow); }
+      .table-wrap { overflow: auto; max-height: 64vh; background: #154fc1; }
+      .bookings-table { width: 100%; min-width: 1780px; border-collapse: collapse; color: #fff; font-size: 0.86rem; }
+      .bookings-table th { position: sticky; top: 0; z-index: 1; padding: 11px 10px; text-align: left; white-space: nowrap; color: #c9dcff; background: #0d3d9a; }
+      .bookings-table td { padding: 11px 10px; border-top: 1px solid #547ed2; vertical-align: middle; }
+      .bookings-table tbody tr:nth-child(even) { background: #1045ad; }
+      .bookings-table tbody tr:hover { background: #245fce; }
+      .bookings-table .empty-row td { padding: 30px; text-align: center; color: #d8e5ff; }
+      .status-badge { display: inline-block; border-radius: 999px; padding: 3px 9px; color: #6a5200; background: #fff0a8; font-size: 0.75rem; font-weight: 800; white-space: nowrap; }
+      .status-badge.complete { color: #e4ffe9; background: #0d7b35; }
+      .edit-button { border: 0; border-radius: 8px; padding: 7px 12px; color: #fff; background: #102b4b; font-weight: 800; }
+      .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 18px; background: rgba(3, 16, 31, 0.72); }
+      .modal-panel { position: relative; width: min(980px, 100%); max-height: calc(100vh - 36px); overflow: auto; border-radius: 16px; background: #fff; box-shadow: 0 26px 80px rgba(0, 0, 0, 0.32); }
+      .modal-close { position: sticky; top: 10px; z-index: 3; float: right; margin: 10px 10px -48px 0; width: 38px; height: 38px; border: 0; border-radius: 50%; color: #fff; background: #102b4b; font-size: 1.3rem; font-weight: 800; }
+      .record-loading { padding: 70px 24px; color: var(--muted); text-align: center; }
+      .record-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 18px; color: var(--muted); font-size: 0.9rem; }
+      .hidden { display: none !important; }
+
+      @media (max-width: 900px) {
+        .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 620px) {
+        .grid { grid-template-columns: 1fr; }
+        .field.full, .subhead { grid-column: auto; }
+        .page { padding: 18px 12px 36px; }
+        .card-body { padding: 17px; }
+        .view-switch { width: 100%; }
+        .tab { flex: 1; }
+        .dashboard-bar { align-items: flex-start; }
+        .dashboard-bar h1 { font-size: 1.35rem; }
+        .filter-grid { grid-template-columns: 1fr; }
+        .modal { padding: 0; }
+        .modal-panel { min-height: 100vh; max-height: 100vh; border-radius: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Brampton Shipping Booking Form</div>
+        <div class="subtitle">Brampton customer booking and office processing</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <nav class="view-switch" aria-label="Form view">
+        <button id="customerTab" class="tab" type="button" onclick="showView('customer')">For Customer</button>
+        <button id="officeTab" class="tab" type="button" onclick="showView('office')">For Brampton Office</button>
+      </nav>
+
+      <section id="customerView">
+        <div id="customerCard" class="card">
+          <h1 class="section-heading">For Customer</h1>
+          <div class="card-body">
+            <p class="intro">Enter the Brampton shipment information below. The Brampton office will complete the remaining processing fields.</p>
+            <form id="customerForm">
+              <div class="grid">
+                <div class="field">
+                  <label class="required" for="dateBooking">Date Booking</label>
+                  <input id="dateBooking" name="dateBooking" type="date" required>
+                </div>
+                <div class="field">
+                  <label class="required" for="timeOfBooking">Time Of Booking</label>
+                  <input id="timeOfBooking" name="timeOfBooking" type="time" required>
+                </div>
+
+                <div class="field full">
+                  <label class="required" for="bookingPersonName">Booking Person Name</label>
+                  <input id="bookingPersonName" name="bookingPersonName" maxlength="120" autocomplete="name" required>
+                </div>
+
+                <div class="subhead">Shipper details</div>
+                <div class="field">
+                  <label class="required" for="shipperName">Shipper Name</label>
+                  <input id="shipperName" name="shipperName" maxlength="120" required>
+                </div>
+                <div class="field">
+                  <label class="required" for="shipperPhone">Shipper Phone</label>
+                  <input id="shipperPhone" name="shipperPhone" type="tel" maxlength="30" autocomplete="tel" required>
+                </div>
+                <div class="field full">
+                  <label class="required" for="shipperAddress">Shipper Address</label>
+                  <textarea id="shipperAddress" name="shipperAddress" maxlength="500" autocomplete="street-address" required></textarea>
+                </div>
+                <div class="field full">
+                  <label class="required" for="shipperEmail">Shipper Email</label>
+                  <input id="shipperEmail" name="shipperEmail" type="email" maxlength="180" autocomplete="email" required>
+                </div>
+
+                <div class="subhead">Consignee details</div>
+                <div class="field">
+                  <label class="required" for="consigneeName">Consignee Name</label>
+                  <input id="consigneeName" name="consigneeName" maxlength="120" required>
+                </div>
+                <div class="field">
+                  <label class="required" for="consigneePhone">Consignee Phone</label>
+                  <input id="consigneePhone" name="consigneePhone" type="tel" maxlength="30" required>
+                </div>
+                <div class="field full">
+                  <label class="required" for="consigneeAddress">Consignee Address</label>
+                  <textarea id="consigneeAddress" name="consigneeAddress" maxlength="500" required></textarea>
+                </div>
+                <div class="field full">
+                  <label class="required" for="consigneeEmail">Consignee Email</label>
+                  <input id="consigneeEmail" name="consigneeEmail" type="email" maxlength="180" required>
+                </div>
+
+                <div class="subhead">Shipment details</div>
+                <div class="field">
+                  <label class="required" for="noOfBoxes">No Of Boxes</label>
+                  <input id="noOfBoxes" name="noOfBoxes" type="number" min="1" step="1" required>
+                </div>
+                <div class="field">
+                  <label class="required" for="actualWeight">Actual Weight</label>
+                  <input id="actualWeight" name="actualWeight" type="number" min="0.01" step="0.01" placeholder="e.g. 12.5" required>
+                </div>
+                <div class="field full">
+                  <label class="required" for="boxDimension">Box Dimension</label>
+                  <input id="boxDimension" name="boxDimension" maxlength="120" placeholder="e.g. 40 × 30 × 25 cm" required>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button id="customerSubmit" class="primary" type="submit">Submit booking</button>
+              </div>
+              <div id="customerMessage" class="message" role="alert"></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="customerSuccess" class="card success-panel" aria-live="polite">
+          <div class="success-icon">✓</div>
+          <h2>Booking submitted</h2>
+          <p>The Brampton office can now continue processing this booking.</p>
+          <div id="customerReference" class="reference"></div>
+          <div><button class="secondary" type="button" onclick="resetCustomerForm()">Create another booking</button></div>
+        </div>
+      </section>
+
+      <section id="officeView" class="hidden">
+        <div id="officeLogin" class="card office-login">
+          <h1 class="section-heading">For Brampton Office</h1>
+          <div class="card-body">
+            <p class="intro">Enter the private Brampton office password to view and process bookings.</p>
+            <form id="officeLoginForm">
+              <div class="field">
+                <label class="required" for="officeAccessCode">Brampton office password</label>
+                <input id="officeAccessCode" type="password" minlength="10" autocomplete="current-password" required>
+              </div>
+              <div class="actions"><button id="officeLoginButton" class="primary" type="submit">Open dashboard</button></div>
+              <div id="officeLoginMessage" class="message" role="alert"></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="officeWorkspace" class="hidden">
+          <div class="dashboard-bar">
+            <div>
+              <h1 id="dashboardTitle">Welcome, Brampton</h1>
+              <p id="dashboardSubtitle">Brampton booking dashboard</p>
+            </div>
+            <div class="dashboard-actions">
+              <button type="button" onclick="loadOfficeQueue()">Refresh</button>
+              <button type="button" onclick="showView('customer')">+ New Entry</button>
+              <button class="logout-button" type="button" onclick="logoutOffice()">Logout</button>
+            </div>
+          </div>
+
+          <div id="summaryCards" class="summary-grid" aria-label="Booking summary"></div>
+
+          <div class="dashboard-role">
+            <strong id="roleTitle">Role: Brampton Office</strong>
+            <span id="roleDescription">View and update Brampton bookings only.</span>
+          </div>
+
+          <section class="filter-card" aria-label="Booking filters">
+            <div class="filter-grid">
+              <div class="field">
+                <label for="filterBookingDate">Booking Date</label>
+                <input id="filterBookingDate" type="date">
+              </div>
+              <div class="field">
+                <label for="queueSearch">Search</label>
+                <input id="queueSearch" type="search" placeholder="SNo, reference, name, Quickship…">
+              </div>
+              <div class="field">
+                <label for="filterStatus">Status</label>
+                <select id="filterStatus">
+                  <option value="ALL">All</option>
+                  <option value="Awaiting Brampton Office">Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              <div class="filter-actions">
+                <button type="button" onclick="clearOfficeFilters()">Clear Filters</button>
+              </div>
+            </div>
+            <div id="queueMessage" class="message" role="alert"></div>
+          </section>
+
+          <div class="table-heading">
+            <h2>All Bookings</h2>
+            <span id="recordCount">0 records</span>
+          </div>
+          <section class="table-card">
+            <div class="table-wrap">
+              <table class="bookings-table">
+                <thead>
+                  <tr>
+                    <th>SNo</th>
+                    <th>Location</th>
+                    <th>Booking Date</th>
+                    <th>Booking Person</th>
+                    <th>Shipper</th>
+                    <th>Consignee</th>
+                    <th>Boxes</th>
+                    <th>Actual Weight</th>
+                    <th>Quickship No</th>
+                    <th>Chargeable Weight</th>
+                    <th>Amount Collected</th>
+                    <th>Payment</th>
+                    <th>Shipment Type</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="officeTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div id="recordModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+          <section class="modal-panel">
+            <button class="modal-close" type="button" aria-label="Close booking editor" onclick="closeRecordModal()">×</button>
+            <div id="recordLoading" class="record-loading">Loading booking…</div>
+            <div id="recordEditor" class="hidden">
+              <h2 id="recordModalTitle" class="section-heading">Booking details</h2>
+              <div class="card-body">
+                <div class="record-meta">
+                  <span id="recordSerial"></span>
+                  <span id="recordIdText"></span>
+                  <span id="recordStatus"></span>
+                </div>
+
+                <form id="officeForm">
+                  <input id="officeRecordId" name="recordId" type="hidden">
+                  <div class="grid">
+                    <div class="subhead">Customer information (read only)</div>
+                    <div class="field full"><label>Location</label><input id="readLocation" readonly></div>
+                    <div class="field"><label>Date Booking</label><input id="readDateBooking" readonly></div>
+                    <div class="field"><label>Time Of Booking</label><input id="readTimeOfBooking" readonly></div>
+                    <div class="field full"><label>Booking Person Name</label><input id="readBookingPersonName" readonly></div>
+                    <div class="field"><label>Shipper Name</label><input id="readShipperName" readonly></div>
+                    <div class="field"><label>Shipper Phone</label><input id="readShipperPhone" readonly></div>
+                    <div class="field full"><label>Shipper Address</label><textarea id="readShipperAddress" readonly></textarea></div>
+                    <div class="field full"><label>Shipper Email</label><input id="readShipperEmail" readonly></div>
+                    <div class="field"><label>Consignee Name</label><input id="readConsigneeName" readonly></div>
+                    <div class="field"><label>Consignee Phone</label><input id="readConsigneePhone" readonly></div>
+                    <div class="field full"><label>Consignee Address</label><textarea id="readConsigneeAddress" readonly></textarea></div>
+                    <div class="field full"><label>Consignee Email</label><input id="readConsigneeEmail" readonly></div>
+                    <div class="field"><label>No Of Boxes</label><input id="readNoOfBoxes" readonly></div>
+                    <div class="field"><label>Actual Weight</label><input id="readActualWeight" readonly></div>
+                    <div class="field full"><label>Box Dimension</label><input id="readBoxDimension" readonly></div>
+
+                    <div class="subhead">For Brampton Office</div>
+                    <div class="field">
+                      <label class="required" for="quickshipNo">Quickship No</label>
+                      <input id="quickshipNo" name="quickshipNo" maxlength="120" required>
+                    </div>
+                    <div class="field">
+                      <label class="required" for="chargeableWeight">Chargeable Weight</label>
+                      <input id="chargeableWeight" name="chargeableWeight" type="number" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="field">
+                      <label class="required" for="amountCollected">Amount Collected</label>
+                      <input id="amountCollected" name="amountCollected" type="number" min="0" step="0.01" required>
+                    </div>
+                    <div class="field">
+                      <label class="required" for="modeOfPayment">Mode of payment</label>
+                      <input id="modeOfPayment" name="modeOfPayment" maxlength="120" placeholder="e.g. Cash, card, e-transfer" required>
+                    </div>
+                    <div class="field">
+                      <label class="required" for="typeOfShipment">Type Of Shipment</label>
+                      <select id="typeOfShipment" name="typeOfShipment" required>
+                        <option value="">Select…</option>
+                        <option value="Domestic">Domestic</option>
+                        <option value="International">International</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label class="required" for="serviceType">Service Type</label>
+                      <select id="serviceType" name="serviceType" required>
+                        <option value="">Select…</option>
+                        <option value="Self">Self</option>
+                        <option value="Purolator">Purolator</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="actions">
+                    <button id="officeSave" class="primary" type="submit">Save office details</button>
+                    <button class="secondary" type="button" onclick="closeRecordModal()">Cancel</button>
+                  </div>
+                  <div id="officeMessage" class="message" role="alert"></div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const INITIAL_VIEW = <?!= JSON.stringify(initialView) ?>;
+      let officeAccessCode = '';
+      let selectedRecordId = '';
+      let officeRecords = [];
+      let searchTimer = null;
+
+      const byId = (id) => document.getElementById(id);
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setCustomerDateTime();
+        byId('customerForm').addEventListener('submit', submitCustomerForm);
+        byId('officeLoginForm').addEventListener('submit', openOfficeQueue);
+        byId('officeForm').addEventListener('submit', submitOfficeForm);
+        byId('queueSearch').addEventListener('input', () => {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(applyOfficeFilters, 150);
+        });
+        byId('filterBookingDate').addEventListener('change', applyOfficeFilters);
+        byId('filterStatus').addEventListener('change', applyOfficeFilters);
+        byId('recordModal').addEventListener('click', (event) => {
+          if (event.target === byId('recordModal')) closeRecordModal();
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') closeRecordModal();
+        });
+        showView(INITIAL_VIEW);
+      });
+
+      function callServer(method, ...args) {
+        return new Promise((resolve, reject) => {
+          const runner = google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler((error) => reject(new Error(error && error.message ? error.message : String(error))));
+          runner[method](...args);
+        });
+      }
+
+      function showView(view) {
+        const office = view === 'office';
+        byId('customerView').classList.toggle('hidden', office);
+        byId('officeView').classList.toggle('hidden', !office);
+        byId('customerTab').classList.toggle('active', !office);
+        byId('officeTab').classList.toggle('active', office);
+        document.body.classList.toggle('office-mode', office);
+      }
+
+      function setCustomerDateTime() {
+        const now = new Date();
+        const pad = (number) => String(number).padStart(2, '0');
+        byId('dateBooking').value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        byId('timeOfBooking').value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      }
+
+      function formObject(form) {
+        return Object.fromEntries(new FormData(form).entries());
+      }
+
+      async function submitCustomerForm(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const button = byId('customerSubmit');
+        setMessage('customerMessage', '', '');
+        setBusy(button, true, 'Submitting…');
+        try {
+          const result = await callServer('submitCustomerBooking', formObject(form));
+          byId('customerReference').textContent = `${result.location} · SNo ${result.serialNumber} · Reference ${result.recordId}`;
+          byId('customerCard').classList.add('hidden');
+          byId('customerSuccess').classList.add('show');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+          setMessage('customerMessage', error.message, 'error');
+        } finally {
+          setBusy(button, false, 'Submit booking');
+        }
+      }
+
+      function resetCustomerForm() {
+        byId('customerForm').reset();
+        setCustomerDateTime();
+        byId('customerSuccess').classList.remove('show');
+        byId('customerCard').classList.remove('hidden');
+        setMessage('customerMessage', '', '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      async function openOfficeQueue(event) {
+        event.preventDefault();
+        const code = byId('officeAccessCode').value.trim();
+        const button = byId('officeLoginButton');
+        setMessage('officeLoginMessage', '', '');
+        setBusy(button, true, 'Checking…');
+        try {
+          officeAccessCode = code;
+          await loadOfficeQueue(true);
+          byId('officeLogin').classList.add('hidden');
+          byId('officeWorkspace').classList.remove('hidden');
+        } catch (error) {
+          officeAccessCode = '';
+          setMessage('officeLoginMessage', error.message, 'error');
+        } finally {
+          setBusy(button, false, 'Open dashboard');
+        }
+      }
+
+      function logoutOffice() {
+        clearTimeout(searchTimer);
+        officeAccessCode = '';
+        selectedRecordId = '';
+        officeRecords = [];
+
+        closeRecordModal();
+        byId('officeLoginForm').reset();
+        byId('officeForm').reset();
+        byId('filterBookingDate').value = '';
+        byId('queueSearch').value = '';
+        byId('filterStatus').value = 'ALL';
+        byId('summaryCards').innerHTML = '';
+        byId('recordCount').textContent = '0 of 0 records';
+        setTableLoading('Sign in to view bookings.');
+        setMessage('queueMessage', '', '');
+        setMessage('officeMessage', '', '');
+        setMessage('officeLoginMessage', '', '');
+        byId('officeWorkspace').classList.add('hidden');
+        byId('officeLogin').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        byId('officeAccessCode').focus();
+      }
+
+      async function loadOfficeQueue(propagateError = false) {
+        setTableLoading('Loading bookings…');
+        setMessage('queueMessage', '', '');
+        try {
+          officeRecords = await callServer('getOfficeRecords', officeAccessCode);
+          renderSummary(officeRecords);
+          applyOfficeFilters();
+        } catch (error) {
+          officeRecords = [];
+          setTableLoading('Unable to load bookings.');
+          setMessage('queueMessage', error.message, 'error');
+          if (propagateError) throw error;
+        }
+      }
+
+      function renderSummary(records) {
+        const container = byId('summaryCards');
+        const completed = records.filter((record) => record.status === 'Completed').length;
+        const cards = [
+          { label: 'Total', value: records.length },
+          { label: 'Pending', value: records.length - completed },
+          { label: 'Completed', value: completed },
+        ];
+        container.innerHTML = '';
+        cards.forEach((card) => {
+          const item = document.createElement('div');
+          item.className = 'summary-card';
+          const label = document.createElement('div');
+          label.className = 'summary-label';
+          label.textContent = card.label;
+          const value = document.createElement('div');
+          value.className = 'summary-value';
+          value.textContent = card.value;
+          item.append(label, value);
+          container.appendChild(item);
+        });
+      }
+
+      function applyOfficeFilters() {
+        const query = byId('queueSearch').value.trim().toLowerCase();
+        const bookingDate = byId('filterBookingDate').value;
+        const status = byId('filterStatus').value;
+        const filtered = officeRecords.filter((record) => {
+          if (bookingDate && record.dateBooking !== bookingDate) return false;
+          if (status !== 'ALL' && record.status !== status) return false;
+          if (!query) return true;
+          return [
+            record.serialNumber,
+            record.recordId,
+            record.location,
+            record.bookingPersonName,
+            record.shipperName,
+            record.consigneeName,
+            record.quickshipNo,
+            record.modeOfPayment,
+          ].join(' ').toLowerCase().includes(query);
+        });
+
+        renderTable(filtered);
+        byId('recordCount').textContent = `${filtered.length} of ${officeRecords.length} records`;
+      }
+
+      function renderTable(records) {
+        const body = byId('officeTableBody');
+        body.innerHTML = '';
+        if (!records.length) {
+          const row = document.createElement('tr');
+          row.className = 'empty-row';
+          const cell = document.createElement('td');
+          cell.colSpan = 17;
+          cell.textContent = 'No bookings match the selected filters.';
+          row.appendChild(cell);
+          body.appendChild(row);
+          return;
+        }
+
+        records.forEach((record) => {
+          const row = document.createElement('tr');
+          [
+            record.serialNumber,
+            record.location,
+            record.dateBooking,
+            record.bookingPersonName,
+            record.shipperName,
+            record.consigneeName,
+            record.noOfBoxes,
+            record.actualWeight,
+            record.quickshipNo || '—',
+            record.chargeableWeight || '—',
+            record.amountCollected || '—',
+            record.modeOfPayment || '—',
+            record.typeOfShipment || '—',
+            record.serviceType || '—',
+          ].forEach((value) => row.appendChild(createTableCell(value)));
+
+          const statusCell = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.className = `status-badge${record.status === 'Completed' ? ' complete' : ''}`;
+          badge.textContent = record.status === 'Completed' ? 'Completed' : 'Pending';
+          statusCell.appendChild(badge);
+          row.appendChild(statusCell);
+          row.appendChild(createTableCell(record.submittedAt));
+
+          const actionCell = document.createElement('td');
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'edit-button';
+          edit.textContent = 'Edit';
+          edit.addEventListener('click', () => openRecord(record.recordId));
+          actionCell.appendChild(edit);
+          row.appendChild(actionCell);
+          body.appendChild(row);
+        });
+      }
+
+      function createTableCell(value) {
+        const cell = document.createElement('td');
+        cell.textContent = value == null || value === '' ? '—' : value;
+        return cell;
+      }
+
+      function setTableLoading(message) {
+        const body = byId('officeTableBody');
+        body.innerHTML = '';
+        const row = document.createElement('tr');
+        row.className = 'empty-row';
+        const cell = document.createElement('td');
+        cell.colSpan = 17;
+        cell.textContent = message;
+        row.appendChild(cell);
+        body.appendChild(row);
+      }
+
+      function clearOfficeFilters() {
+        byId('filterBookingDate').value = '';
+        byId('queueSearch').value = '';
+        byId('filterStatus').value = 'ALL';
+        applyOfficeFilters();
+      }
+
+      async function openRecord(recordId) {
+        selectedRecordId = recordId;
+        byId('recordModal').classList.remove('hidden');
+        byId('recordLoading').textContent = 'Loading booking…';
+        byId('recordLoading').classList.remove('hidden');
+        byId('recordEditor').classList.add('hidden');
+        document.body.classList.add('modal-open');
+        try {
+          const record = await callServer('getOfficeRecord', officeAccessCode, recordId);
+          fillRecord(record);
+          byId('recordLoading').classList.add('hidden');
+          byId('recordEditor').classList.remove('hidden');
+        } catch (error) {
+          byId('recordLoading').textContent = error.message;
+        }
+      }
+
+      function closeRecordModal() {
+        byId('recordModal').classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      }
+
+      function fillRecord(record) {
+        byId('recordSerial').textContent = `SNo: ${record.serialNumber}`;
+        byId('recordIdText').textContent = `Reference: ${record.recordId}`;
+        byId('recordStatus').textContent = `Status: ${record.status}`;
+        byId('officeRecordId').value = record.recordId;
+
+        const readFields = {
+          readLocation: 'location',
+          readDateBooking: 'dateBooking',
+          readTimeOfBooking: 'timeOfBooking',
+          readBookingPersonName: 'bookingPersonName',
+          readShipperName: 'shipperName',
+          readShipperPhone: 'shipperPhone',
+          readShipperAddress: 'shipperAddress',
+          readShipperEmail: 'shipperEmail',
+          readConsigneeName: 'consigneeName',
+          readConsigneePhone: 'consigneePhone',
+          readConsigneeAddress: 'consigneeAddress',
+          readConsigneeEmail: 'consigneeEmail',
+          readNoOfBoxes: 'noOfBoxes',
+          readActualWeight: 'actualWeight',
+          readBoxDimension: 'boxDimension',
+        };
+        Object.entries(readFields).forEach(([elementId, key]) => { byId(elementId).value = record[key] || ''; });
+
+        ['quickshipNo', 'chargeableWeight', 'amountCollected', 'modeOfPayment', 'typeOfShipment', 'serviceType']
+          .forEach((key) => { byId(key).value = record[key] || ''; });
+        setMessage('officeMessage', '', '');
+      }
+
+      async function submitOfficeForm(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const button = byId('officeSave');
+        setMessage('officeMessage', '', '');
+        setBusy(button, true, 'Saving…');
+        try {
+          const result = await callServer('saveOfficeFields', officeAccessCode, formObject(form));
+          setMessage('officeMessage', `Brampton office details saved. Status: ${result.status}.`, 'success');
+          byId('recordStatus').textContent = `Status: ${result.status}`;
+          await loadOfficeQueue();
+        } catch (error) {
+          setMessage('officeMessage', error.message, 'error');
+        } finally {
+          setBusy(button, false, 'Save office details');
+        }
+      }
+
+      function setBusy(button, busy, label) {
+        button.disabled = busy;
+        button.textContent = label;
+      }
+
+      function setMessage(id, text, type) {
+        const box = byId(id);
+        box.textContent = text;
+        box.className = `message${text ? ` show ${type}` : ''}`;
+      }
+    </script>
+  </body>
+</html>
+
+
